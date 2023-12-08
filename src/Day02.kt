@@ -14,31 +14,29 @@ fun main() {
     }
 
     fun part2(input: List<String>): Int {
-        input.toMapOfIdAndColors().println()
-        return input.size
+        return input.toMapOfIdAndColors().sumOf {
+            it.second.map { it.value.max() }.reduce(Int::times)
+        }
     }
 
     // test if implementation meets criteria from the description, like:
     val testInput = readInput("Day02_test")
-    check(part1(testInput, condition = mapOf("red" to 12, "green" to 13, "blue" to 14)) == 8)
+    check(part2(testInput) == 2286)
 
     val input = readInput("Day02")
     part1(input, mapOf("red" to 12, "green" to 13, "blue" to 14)).println()
     part2(input).println()
 }
 
-fun List<String>.toMapOfIdAndColors() = map {
-    val id = it.split(":").first().split(" ").last()
-    val colors = it
-            .split(":").last()
+fun List<String>.toMapOfIdAndColors() = map { line ->
+    val (id, colorsPart) = line.split(":").let { it.first().split(" ").last() to it.last() }
+    val colors = colorsPart
             .split(";")
             .asSequence()
-            .map { it.split(",") }
-            .flatten()
+            .flatMap { it.split(",") }
             .map { it.trim().split(" ").zipWithNext() }
             .flatten()
             .groupBy { it.second }
-            .map { it.key to it.value.map { it.first.toInt() } }
-            .toMap()
+            .mapValues { (_, values) -> values.map { it.first.toInt() } }
     id to colors
 }
